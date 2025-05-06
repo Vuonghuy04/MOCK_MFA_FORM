@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Keycloak MFA Test</title>
+</head>
+<body>
+  <div id="app">
+    <h2>Test</h2>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/keycloak-js@23.0.3/dist/keycloak.min.js"></script>
+  <script>
+    const keycloak = new Keycloak({
+      url: 'http://localhost:8080',
+      realm: 'MFA_Demo',
+      clientId: 'mock-client'
+    });
+
+    keycloak.init({
+      onLoad: 'login-required',
+      checkLoginIframe: false
+    }).then(authenticated => {
+      if (authenticated) {
+        document.getElementById('app').innerHTML = `
+          <h2>Hello, ${keycloak.tokenParsed.preferred_username}</h2>
+          <p>You are authenticated with MFA.</p>
+          <button onclick="keycloak.logout({ redirectUri: 'http://localhost:3000' })">Logout</button>
+        `;
+      } else {
+        document.getElementById('app').innerHTML = 'Not authenticated';
+      }
+    }).catch(error => {
+      console.error('Auth failed:', error);
+      keycloak.login();
+      // document.getElementById('app').innerHTML = `
+      //   <h3>Authentication failed.</h3>
+      //   <pre>${JSON.stringify(error, null, 2)}</pre>
+      // `;
+    });
+  </script>
+</body>
+</html>
